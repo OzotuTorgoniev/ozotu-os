@@ -1,0 +1,13 @@
+build/
+*.o
+*.elf
+
+dist/
+*.iso
+
+iso_root/
+
+.vscode/
+*.swp
+*~
+.DS_Store
