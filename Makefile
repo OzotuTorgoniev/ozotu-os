@@ -7,8 +7,21 @@ CFLAGS=\
 -fno-stack-protector \
 -fno-pic \
 -m64 \
+-mcmodel=kernel \
 -Wall \
--Wextra
+-Wextra \
+-Ikernel
+
+# All *.c from kernel
+C_SOURCES := $(shell find kernel -name "*.c")
+
+# Convert:
+# kernel/graphics/framebuffer.c
+# ->
+# build/graphics/framebuffer.o
+C_OBJECTS := $(patsubst kernel/%.c,build/%.o,$(C_SOURCES))
+
+ASM_OBJECT := build/start.o
 
 all: dist/ozotu.iso
 
@@ -16,20 +29,27 @@ build:
 	mkdir -p build
 	mkdir -p dist
 
-build/start.o: build
-	nasm -f elf64 kernel/start.asm -o build/start.o
+# Boot ASM
 
-build/kernel.o: build
-	$(CC) $(CFLAGS) -c kernel/kernel.c -o build/kernel.o
+$(ASM_OBJECT): kernel/boot/start.asm | build
+	nasm -f elf64 $< -o $@
 
-build/kernel.elf: build/start.o build/kernel.o
+build/%.o: kernel/%.c | build
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Link
+
+build/kernel.elf: $(ASM_OBJECT) $(C_OBJECTS)
 	$(LD) \
 		-nostdlib \
 		-z max-page-size=0x1000 \
 		-T linker.ld \
-		build/start.o \
-		build/kernel.o \
-		-o build/kernel.elf
+		$(ASM_OBJECT) \
+		$(C_OBJECTS) \
+		-o $@
+
+# ISO
 
 dist/ozotu.iso: build/kernel.elf limine.conf
 	rm -rf iso_root
@@ -54,14 +74,17 @@ dist/ozotu.iso: build/kernel.elf limine.conf
 		-o dist/ozotu.iso \
 		iso_root
 
-run:
+run: dist/ozotu.iso
 	qemu-system-x86_64 \
 		-machine q35 \
 		-m 512M \
 		-bios /usr/share/OVMF/OVMF_CODE.fd \
-		-cdrom dist/ozotu.iso
+		-cdrom dist/ozotu.iso \
+		-full-screen
 
 clean:
 	rm -rf build
 	rm -rf dist
 	rm -rf iso_root
+
+.PHONY: all run clean
