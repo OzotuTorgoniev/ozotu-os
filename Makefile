@@ -80,7 +80,7 @@ run: dist/ozotu.iso
 		-m 512M \
 		-bios /usr/share/OVMF/OVMF_CODE.fd \
 		-cdrom dist/ozotu.iso \
-		-full-screen
+		-display gtk,full-screen=on
 
 clean:
 	rm -rf build

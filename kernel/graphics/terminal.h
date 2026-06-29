@@ -4,6 +4,8 @@
 
 #include "../boot/limine.h"
 
+void terminal_backspace(struct limine_framebuffer *fb);
+void terminal_clear(struct limine_framebuffer *fb);
 void terminal_init(
     int start_x,
     int start_y
@@ -19,6 +21,9 @@ void terminal_draw_char(
     int y,
     uint32_t color
 );
+
+void terminal_draw_cursor(struct limine_framebuffer *fb);
+void terminal_erase_cursor(struct limine_framebuffer *fb);
 
 int terminal_get_cursor_x(void);
 int terminal_get_cursor_y(void);
