@@ -1,4 +1,6 @@
+#include "./stddef.h"
 #include "string.h"
+
 
 int atoi(const char *str)
 {
@@ -68,4 +70,52 @@ int strcmp(const char *a, const char *b)
     }
 
     return (unsigned char)*a - (unsigned char)*b;
+}
+
+char *strtok(char *str, const char *delim) {
+    static char *next = NULL;
+
+    if (str != NULL)
+        next = str;
+
+    if (next == NULL)
+        return NULL;
+
+    while (*next) {
+        int is_delim = 0;
+
+        for (const char *d = delim; *d; d++) {
+            if (*next == *d) {
+                is_delim = 1;
+                break;
+            }
+        }
+
+        if (!is_delim)
+            break;
+
+        next++;
+    }
+
+    if (*next == '\0') {
+        next = NULL;
+        return NULL;
+    }
+
+    char *token = next;
+
+    while (*next) {
+        for (const char *d = delim; *d; d++) {
+            if (*next == *d) {
+                *next = '\0';
+                next++;
+                return token;
+            }
+        }
+
+        next++;
+    }
+
+    next = NULL;
+    return token;
 }

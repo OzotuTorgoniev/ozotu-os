@@ -14,3 +14,7 @@ void row(int length, uint32_t color, struct limine_framebuffer *fb) {
 
     print(fb, "\n", 0xFFFFFF);
 }
+
+void break_line(struct limine_framebuffer *fb) {
+    print(fb, "\n", 0xFFFFFF);
+}
